@@ -39,5 +39,43 @@ MUL: '*';
 ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
+// Stylesheet
+stylesheet: styleRule+ EOF;
 
-stylesheet: EOF;
+// Style rule
+styleRule: variableAssignment | selector OPEN_BRACE body CLOSE_BRACE;
+
+// CSS styling block
+selector: idSelector | classSelector | tagSelector;
+body: declaration+;
+
+// Selector types
+idSelector: ID_IDENT;
+classSelector: CLASS_IDENT;
+tagSelector: LOWER_IDENT;
+
+// Variable style
+variableAssignment: variableReference ASSIGNMENT_OPERATOR expression SEMICOLON;
+variableReference: CAPITAL_IDENT;
+
+// Declaration style
+//declaration: propertyName COLON (expression | operation) SEMICOLON;
+declaration: propertyName COLON expression SEMICOLON;
+propertyName: LOWER_IDENT;
+
+// Operation style
+//operation: operation MUL operation
+//           | operation PLUS operation
+//           | operation MIN operation
+//           | expression;
+
+// Expression
+expression: variableReference
+            | literal;
+
+literal: bool
+        | COLOR
+        | PERCENTAGE
+        | PIXELSIZE
+        | SCALAR;
+bool: TRUE | FALSE;

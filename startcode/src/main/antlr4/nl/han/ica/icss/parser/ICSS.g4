@@ -40,42 +40,50 @@ ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
 // Stylesheet
-stylesheet: styleRule+ EOF;
+stylesheet: variableAssignment* styleRule* EOF;
 
-// Style rule
-styleRule: variableAssignment | selector OPEN_BRACE body CLOSE_BRACE;
-
-// CSS styling block
-selector: idSelector | classSelector | tagSelector;
-body: declaration+;
-
-// Selector types
-idSelector: ID_IDENT;
-classSelector: CLASS_IDENT;
-tagSelector: LOWER_IDENT;
-
-// Variable style
+// Variable
 variableAssignment: variableReference ASSIGNMENT_OPERATOR expression SEMICOLON;
 variableReference: CAPITAL_IDENT;
 
-// Declaration style
+// Stylerule
+styleRule: selector OPEN_BRACE declaration+ CLOSE_BRACE;
+
+// Selector
+selector: ID_IDENT #idSelector
+        | CLASS_IDENT #classSelector
+        | LOWER_IDENT #tagSelector
+        ;
+
+// Declaration
 //declaration: propertyName COLON (expression | operation) SEMICOLON;
 declaration: propertyName COLON expression SEMICOLON;
 propertyName: LOWER_IDENT;
 
-// Operation style
-//operation: operation MUL operation
-//           | operation PLUS operation
-//           | operation MIN operation
-//           | expression;
+// Operation
+//operation: expression
+//        | operation MUL operation
+//        | operation MIN operation
+//        | operation PLUS operation
+//        ;
+//operator: MUL #multiplyOperation
+//        | PLUS #addOperation
+//        | MIN #subtractOperation
+//        ;
+//operation: expression operator (expression | operation);
 
 // Expression
 expression: variableReference
-            | literal;
+            | literal
+            ;
 
-literal: bool
-        | COLOR
-        | PERCENTAGE
-        | PIXELSIZE
-        | SCALAR;
-bool: TRUE | FALSE;
+// Literal
+literal: bool           #boolLiteral
+        | COLOR         #colorLiteral
+        | PERCENTAGE    #percentageLiteral
+        | PIXELSIZE     #pixelsizeLiteral
+        | SCALAR        #scalarLiteral
+        ;
+bool: TRUE      #trueBool
+    | FALSE     #falseBool
+    ;

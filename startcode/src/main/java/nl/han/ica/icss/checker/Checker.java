@@ -23,6 +23,7 @@ public class Checker {
         for (ASTNode node :
                 ast.root.getChildren()) {
             checkCH01(node);
+            checkCH03(node);
         }
     }
 
@@ -38,6 +39,28 @@ public class Checker {
             }
 
             node.getChildren().forEach(this::checkCH01);
+        }
+    }
+
+    private void checkCH02(ASTNode node) {
+        if (node.getChildren().size() == 1) return;
+
+        if (node instanceof Operation) {
+            if (expressionTypeResolver(((Operation) node).lhs) != expressionTypeResolver(((Operation) node).rhs)) {
+                node.setError("Operands must be of same type");
+            }
+        }
+    }
+
+    private void checkCH03(ASTNode node) {
+        if (node.getChildren().size() != 1) {
+            if (node instanceof Operation) {
+                if (((Operation) node).lhs instanceof ColorLiteral || ((Operation) node).rhs instanceof ColorLiteral) {
+                    node.setError(String.format("An operand cannot be of type: Color"));
+                }
+            }
+
+            node.getChildren().forEach(this::checkCH03);
         }
     }
 

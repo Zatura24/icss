@@ -57,15 +57,9 @@ public class ASTListener extends ICSSBaseListener {
     }
 
     @Override
-    public void enterVariableReference(ICSSParser.VariableReferenceContext ctx) {
+    public void exitVariableReference(ICSSParser.VariableReferenceContext ctx) {
         ASTNode variableReference = new VariableReference(ctx.getChild(0).getText());
         currentContainer.peek().addChild(variableReference);
-        currentContainer.push(variableReference);
-    }
-
-    @Override
-    public void exitVariableReference(ICSSParser.VariableReferenceContext ctx) {
-        currentContainer.pop();
     }
 
     // Stylerule
@@ -113,7 +107,42 @@ public class ASTListener extends ICSSBaseListener {
         currentContainer.pop();
     }
 
+    // Operation
+    @Override
+    public void enterMultiplyOperation(ICSSParser.MultiplyOperationContext ctx) {
+        Operation operation = new MultiplyOperation();
+        currentContainer.peek().addChild(operation);
+        currentContainer.push(operation);
+    }
 
+    @Override
+    public void exitMultiplyOperation(ICSSParser.MultiplyOperationContext ctx) {
+        currentContainer.pop();
+    }
+
+    @Override
+    public void enterAddOperation(ICSSParser.AddOperationContext ctx) {
+        Operation operation = new AddOperation();
+        currentContainer.peek().addChild(operation);
+        currentContainer.push(operation);
+    }
+
+    @Override
+    public void exitAddOperation(ICSSParser.AddOperationContext ctx) {
+        currentContainer.pop();
+    }
+
+    @Override
+    public void enterSubtractOperation(ICSSParser.SubtractOperationContext ctx) {
+        Operation operation = new SubtractOperation();
+        currentContainer.peek().addChild(operation);
+        currentContainer.push(operation);
+    }
+
+    @Override
+    public void exitSubtractOperation(ICSSParser.SubtractOperationContext ctx) {
+        currentContainer.pop();
+    }
 
     // Literal
     @Override

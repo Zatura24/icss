@@ -47,7 +47,8 @@ variableAssignment: variableReference ASSIGNMENT_OPERATOR expression SEMICOLON;
 variableReference: CAPITAL_IDENT;
 
 // Stylerule
-styleRule: selector OPEN_BRACE declaration+ CLOSE_BRACE;
+styleRule: selector body | ifClause;
+body: OPEN_BRACE declaration+ CLOSE_BRACE;
 
 // Selector
 selector: ID_IDENT #idSelector
@@ -57,25 +58,22 @@ selector: ID_IDENT #idSelector
 
 // Declaration
 //declaration: propertyName COLON (expression | operation) SEMICOLON;
-declaration: propertyName COLON expression SEMICOLON;
+declaration: propertyName COLON expression SEMICOLON | ifClause;
 propertyName: LOWER_IDENT;
 
+// If clause
+ifClause: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE body;
+
 // Operation
-//operation: expression
-//        | operation MUL operation
-//        | operation MIN operation
-//        | operation PLUS operation
-//        ;
-//operator: MUL #multiplyOperation
-//        | PLUS #addOperation
-//        | MIN #subtractOperation
-//        ;
-//operation: expression operator (expression | operation);
 
 // Expression
-expression: variableReference
-            | literal
+expression: expression MUL expression #multiplyOperation
+            | expression PLUS expression #addOperation
+            | expression MIN expression #subtractOperation
+            | variableReference #varRef
+            | literal #lit
             ;
+
 
 // Literal
 literal: bool           #boolLiteral

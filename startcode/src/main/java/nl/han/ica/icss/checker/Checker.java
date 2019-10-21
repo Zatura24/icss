@@ -1,57 +1,69 @@
 package nl.han.ica.icss.checker;
 
+import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.literals.ColorLiteral;
+import nl.han.ica.icss.ast.types.ExpressionType;
+import nl.han.ica.icss.helper.ExpressionTypeResolver;
+import nl.han.ica.icss.helper.StyleAttributeChecker;
+
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Stack;
 
-import nl.han.ica.icss.ast.*;
-import nl.han.ica.icss.ast.literals.*;
-import nl.han.ica.icss.ast.types.*;
-
-import javax.swing.*;
-import javax.swing.text.Style;
+import static nl.han.ica.icss.helper.ExpressionTypeResolver.expressionTypeResolver;
 
 public class Checker {
 
-    private LinkedList<HashMap<String,ExpressionType>> variableTypes;
+    private LinkedList<HashMap<String, ExpressionType>> variableTypes;
 
     public void check(AST ast) {
         variableTypes = new LinkedList<>();
-        variableTypes.add(new HashMap<>());
 
         for (ASTNode node :
                 ast.root.getChildren()) {
-            checkCH01FindAssignment(node);
-//            checkCH01FindReference(node);
-            checkCH03(node);
-            checkCH04(node);
-            checkCH05(node);
+            traverse(node);
         }
     }
 
-    private void checkCH01FindAssignment(ASTNode node) {
-        if (node.getChildren().size() != 1) {
-            if (node instanceof VariableAssignment) {
-                variableTypes.get(0).put(((VariableAssignment) node).name.name, expressionTypeResolver(((VariableAssignment) node).expression));
-            } else if (node instanceof VariableReference) {
-                if (!variableTypes.get(0).containsKey(((VariableReference) node).name)) {
-                    node.setError(String.format("Variable \'%s\' is not yet defined.", ((VariableReference) node).name));
-                }
+    private ASTNode traverse(ASTNode root) {
+        if (root.getChildren().size() != 1) {
+            findVariableDecleration(root);
+            checkVariableReference(root);
+
+            for (ASTNode node : root.getChildren()) {
+                traverse(node);
             }
-            node.getChildren().forEach(this::checkCH01FindAssignment);
+        }
+
+        return root;
+    }
+
+    private void findVariableDecleration(ASTNode node) {
+        if (node instanceof VariableAssignment) {
+            if (variableTypes.isEmpty()) variableTypes.add(new HashMap<>());
+
+            variableTypes.getFirst().put(((VariableAssignment) node).name.name, ExpressionTypeResolver.expressionTypeResolver(((VariableAssignment) node).expression));
         }
     }
 
-//    private void checkCH01FindReference(ASTNode node) {
-//        if (node.getChildren().size() != 1) {
-//            if (node instanceof VariableReference) {
-//                if (!variableTypes.get(0).containsKey(((VariableReference) node).name)) {
-//                    node.setError(String.format("Variable \'%s\' is not yet defined.", ((VariableReference) node).name));
-//                }
-//            }
-//            node.getChildren().forEach(this::checkCH01FindReference);
-//        }
-//    }
+    private void checkVariableReference(ASTNode node) {
+        if (node instanceof VariableReference) {
+            if (!variableTypes.getFirst().containsKey(((VariableReference) node).name)) {
+                node.setError(String.format("Variable \'%s\' is not yet defined.", ((VariableReference) node).name));
+            }
+        }
+    }
+
+    private void checkCH02(ASTNode node) {
+        if (node instanceof Operation) {
+            if (((Operation) node).lhs instanceof Operation) checkCH02(((Operation) node).lhs);
+            if (((Operation) node).rhs instanceof Operation) checkCH02(((Operation) node).rhs);
+
+            if (!((Operation) node).lhs.equals(((Operation) node).rhs))
+                node.setError("Left- and right-hand operands must be of same type.");
+        }
+
+        node.getChildren().forEach(this::checkCH02);
+    }
 
     private void checkCH03(ASTNode node) {
         if (node.getChildren().size() != 1) {
@@ -66,6 +78,13 @@ public class Checker {
 
     private void checkCH04(ASTNode node) {
         if (node.getChildren().size() != 1) {
+            if (node instanceof Declaration) {
+                HashMap map = StyleAttributeChecker.getMap();
+
+                if (map.get(((Declaration) node).property.name) != ExpressionTypeResolver.expressionTypeResolver(((Declaration) node).expression)) {
+                    node.setError(String.format("Style attribute \'%s\' cannot have an expression type \'%s\'", ((Declaration) node).property.name, ExpressionTypeResolver.expressionTypeResolver(((Declaration) node).expression)));
+                }
+            }
 
             node.getChildren().forEach(this::checkCH04);
         }
@@ -86,22 +105,6 @@ public class Checker {
             }
 
             node.getChildren().forEach(this::checkCH05);
-        }
-    }
-
-    private static ExpressionType expressionTypeResolver(Expression expression) {
-        if (expression instanceof BoolLiteral) {
-            return ExpressionType.BOOL;
-        } else if (expression instanceof ColorLiteral) {
-            return ExpressionType.COLOR;
-        } else if (expression instanceof PercentageLiteral) {
-            return ExpressionType.PERCENTAGE;
-        } else if (expression instanceof PixelLiteral) {
-            return ExpressionType.PIXEL;
-        } else if (expression instanceof ScalarLiteral) {
-            return ExpressionType.SCALAR;
-        } else {
-            return null;
         }
     }
 }

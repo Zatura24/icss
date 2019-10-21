@@ -21,20 +21,20 @@ public class Generator {
 		if (node instanceof Stylerule) {
 			for (Selector selector :
 					((Stylerule) node).selectors) {
-					stringBuilder.append(selector.toString()).append(" ");
+					stringBuilder.append(selector.toString()).append(' ');
 			}
 
-			stringBuilder.append("{\r\n");
+			stringBuilder.append('{').append(System.lineSeparator());
 
 			for (ASTNode declaration :
 					((Stylerule) node).body) {
 				if (declaration instanceof Declaration) {
 					stringBuilder.append("\t").append(((Declaration) declaration).property.name).append(": ");
-					stringBuilder.append(((Declaration) declaration).expression.toString()).append(";\r\n");
+					stringBuilder.append(((Declaration) declaration).expression.toString()).append(';').append(System.lineSeparator());
 				}
 			}
 
-			stringBuilder.append("}\r\n\r\n");
+			stringBuilder.append('}').append(System.lineSeparator()).append(System.lineSeparator());
 		}
 
 		return stringBuilder.toString();

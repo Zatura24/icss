@@ -28,6 +28,7 @@ public class Checker {
         if (root.getChildren().size() != 1) {
             findVariableDecleration(root);
             checkVariableReference(root);
+            colorNotAllowedInOpperation(root);
 
             for (ASTNode node : root.getChildren()) {
                 traverse(node);
@@ -53,6 +54,14 @@ public class Checker {
         }
     }
 
+    private void colorNotAllowedInOpperation(ASTNode node) {
+        if (node instanceof Operation) {
+            if (((Operation) node).lhs instanceof ColorLiteral || ((Operation) node).rhs instanceof ColorLiteral) {
+                node.setError("An operand cannot be of type: " + ExpressionType.COLOR);
+            }
+        }
+    }
+
     private void checkCH02(ASTNode node) {
         if (node instanceof Operation) {
             if (((Operation) node).lhs instanceof Operation) checkCH02(((Operation) node).lhs);
@@ -63,17 +72,6 @@ public class Checker {
         }
 
         node.getChildren().forEach(this::checkCH02);
-    }
-
-    private void checkCH03(ASTNode node) {
-        if (node.getChildren().size() != 1) {
-            if (node instanceof Operation) {
-                if (((Operation) node).lhs instanceof ColorLiteral || ((Operation) node).rhs instanceof ColorLiteral) {
-                    node.setError("An operand cannot be of type: Color");
-                }
-            }
-            node.getChildren().forEach(this::checkCH03);
-        }
     }
 
     private void checkCH04(ASTNode node) {

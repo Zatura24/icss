@@ -29,6 +29,8 @@ public class Checker {
             findVariableDecleration(root);
             checkVariableReference(root);
             colorNotAllowedInOpperation(root);
+            checkStyleDecleration(root);
+            checkIfCondition(root);
 
             for (ASTNode node : root.getChildren()) {
                 traverse(node);
@@ -74,35 +76,30 @@ public class Checker {
         node.getChildren().forEach(this::checkCH02);
     }
 
-    private void checkCH04(ASTNode node) {
-        if (node.getChildren().size() != 1) {
-            if (node instanceof Declaration) {
-                HashMap map = StyleAttributeChecker.getMap();
+    private void checkStyleDecleration(ASTNode node) {
+        if (node instanceof Declaration) {
+            HashMap map = StyleAttributeChecker.getMap();
+            ExpressionType expression = ((Declaration) node).expression instanceof VariableReference
+                    ? variableTypes.getFirst().get(((VariableReference) ((Declaration) node).expression).name)
+                    : ExpressionTypeResolver.expressionTypeResolver(((Declaration) node).expression);
 
-                if (map.get(((Declaration) node).property.name) != ExpressionTypeResolver.expressionTypeResolver(((Declaration) node).expression)) {
-                    node.setError(String.format("Style attribute \'%s\' cannot have an expression type \'%s\'", ((Declaration) node).property.name, ExpressionTypeResolver.expressionTypeResolver(((Declaration) node).expression)));
-                }
+            if (map.get(((Declaration) node).property.name) != expression) {
+                node.setError(String.format("Style attribute \'%s\' cannot have an expression type \'%s\'", ((Declaration) node).property.name, ExpressionTypeResolver.expressionTypeResolver(((Declaration) node).expression)));
             }
-
-            node.getChildren().forEach(this::checkCH04);
         }
     }
 
-    private void checkCH05(ASTNode node) {
-        if (node.getChildren().size() != 1) {
-            if (node instanceof IfClause) {
-                if (((IfClause) node).conditionalExpression instanceof VariableReference) {
-                    if (variableTypes.get(0).get(((VariableReference) ((IfClause) node).conditionalExpression).name) != ExpressionType.BOOL) {
-                        node.setError("If condition must be of type boolean");
-                    }
-                } else {
-                    if (expressionTypeResolver(((IfClause) node).conditionalExpression) != ExpressionType.BOOL) {
-                        node.setError("If condition must be of type boolean");
-                    }
+    private void checkIfCondition(ASTNode node) {
+        if (node instanceof IfClause) {
+            if (((IfClause) node).conditionalExpression instanceof VariableReference) {
+                if (variableTypes.get(0).get(((VariableReference) ((IfClause) node).conditionalExpression).name) != ExpressionType.BOOL) {
+                    node.setError("If condition must be of type boolean");
+                }
+            } else {
+                if (expressionTypeResolver(((IfClause) node).conditionalExpression) != ExpressionType.BOOL) {
+                    node.setError("If condition must be of type boolean");
                 }
             }
-
-            node.getChildren().forEach(this::checkCH05);
         }
     }
 }

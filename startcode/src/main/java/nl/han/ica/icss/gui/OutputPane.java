@@ -1,13 +1,13 @@
 package nl.han.ica.icss.gui;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 
 @SuppressWarnings("restriction")
 public class OutputPane extends BorderPane {

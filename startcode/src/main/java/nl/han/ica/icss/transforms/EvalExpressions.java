@@ -1,6 +1,8 @@
 package nl.han.ica.icss.transforms;
 
-import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.AST;
+import nl.han.ica.icss.ast.Literal;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 

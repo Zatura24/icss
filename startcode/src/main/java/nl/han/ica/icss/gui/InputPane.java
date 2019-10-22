@@ -1,15 +1,15 @@
 package nl.han.ica.icss.gui;
 
 
-import java.io.*;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.BorderPane;
+
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.stream.Collectors;
-
-import javafx.geometry.Insets;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.Label;
 
 @SuppressWarnings("restriction")
 public class InputPane extends BorderPane {

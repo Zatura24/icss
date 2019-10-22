@@ -17,7 +17,7 @@ public final class ExpressionTypeResolver {
         } else if (expression instanceof ScalarLiteral) {
             return ExpressionType.SCALAR;
         } else {
-            return null;
+            return ExpressionType.UNDEFINED;
         }
     }
 }

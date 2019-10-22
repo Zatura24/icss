@@ -1,6 +1,6 @@
 package nl.han.ica.icss.transforms;
 
-import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.AST;
 
 public class RemoveIf implements Transform {
 

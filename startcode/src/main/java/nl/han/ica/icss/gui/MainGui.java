@@ -1,15 +1,6 @@
 package nl.han.ica.icss.gui;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.*;
-
-//We use this google library, because it makes life so much easier when
-//reading the examples icss files as packaged resource
 import com.google.common.io.Resources;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -22,6 +13,16 @@ import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import nl.han.ica.icss.Pipeline;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
+
+//We use this google library, because it makes life so much easier when
+//reading the examples icss files as packaged resource
 
 @SuppressWarnings("restriction")
 public class MainGui extends Application {

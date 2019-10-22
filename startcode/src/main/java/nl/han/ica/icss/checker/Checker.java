@@ -6,14 +6,14 @@ import nl.han.ica.icss.ast.operations.AddOperation;
 import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 import nl.han.ica.icss.ast.types.ExpressionType;
-import nl.han.ica.icss.helper.ExpressionTypeResolver;
+import nl.han.ica.icss.helper.ExpressionResolver;
 import nl.han.ica.icss.helper.StyleAttributeChecker;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import static nl.han.ica.icss.helper.ExpressionTypeResolver.expressionTypeResolver;
+import static nl.han.ica.icss.helper.ExpressionResolver.getExpressionType;
 
 public class Checker {
 
@@ -46,7 +46,7 @@ public class Checker {
         if (node instanceof VariableAssignment) {
             if (variableTypes.isEmpty()) variableTypes.add(new HashMap<>());
 
-            variableTypes.getFirst().put(((VariableAssignment) node).name.name, ExpressionTypeResolver.expressionTypeResolver(((VariableAssignment) node).expression));
+            variableTypes.getFirst().put(((VariableAssignment) node).name.name, ExpressionResolver.getExpressionType(((VariableAssignment) node).expression));
         }
     }
 
@@ -69,7 +69,7 @@ public class Checker {
      * @return expression type of the operation
      */
     private ExpressionType checkOperationOperands(ASTNode node) {
-        if (node instanceof Literal) return ExpressionTypeResolver.expressionTypeResolver((Literal) node);
+        if (node instanceof Literal) return ExpressionResolver.getExpressionType((Literal) node);
         if (node instanceof VariableReference) return variableTypes.getFirst().get(((VariableReference) node).name);
 
         if (node instanceof Operation) {
@@ -138,7 +138,7 @@ public class Checker {
             if (((IfClause) node).conditionalExpression instanceof VariableReference) {
                 if (variableTypes.get(0).get(((VariableReference) ((IfClause) node).conditionalExpression).name) != ExpressionType.BOOL)
                     node.setError("If condition must be of type boolean");
-            } else if (expressionTypeResolver(((IfClause) node).conditionalExpression) != ExpressionType.BOOL)
+            } else if (getExpressionType(((IfClause) node).conditionalExpression) != ExpressionType.BOOL)
                 node.setError("If condition must be of type boolean");
         }
     }

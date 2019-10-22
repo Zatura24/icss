@@ -4,8 +4,8 @@ import nl.han.ica.icss.ast.Expression;
 import nl.han.ica.icss.ast.literals.*;
 import nl.han.ica.icss.ast.types.ExpressionType;
 
-public final class ExpressionTypeResolver {
-    public static ExpressionType expressionTypeResolver(Expression expression) {
+public final class ExpressionResolver {
+    public static ExpressionType getExpressionType(Expression expression) {
         if (expression instanceof BoolLiteral) {
             return ExpressionType.BOOL;
         } else if (expression instanceof ColorLiteral) {

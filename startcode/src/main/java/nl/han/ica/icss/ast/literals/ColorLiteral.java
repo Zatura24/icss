@@ -28,9 +28,4 @@ public class ColorLiteral extends Literal {
 
         return Objects.hash(value);
     }
-
-    @Override
-    public String toString() {
-        return value;
-    }
 }

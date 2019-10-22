@@ -26,7 +26,7 @@ public class Checker {
     }
 
     private void traverse(ASTNode root) {
-        findVariableDeclaration(root);
+        findVariableAssignment(root);
         checkVariableReference(root);
         checkOperationOperands(root);
         colorNotAllowedInOperation(root);
@@ -42,7 +42,7 @@ public class Checker {
      * Stores found variable declaration in hash map
      * @param node to check
      */
-    private void findVariableDeclaration(ASTNode node) {
+    private void findVariableAssignment(ASTNode node) {
         if (node instanceof VariableAssignment) {
             if (variableTypes.isEmpty()) variableTypes.add(new HashMap<>());
 

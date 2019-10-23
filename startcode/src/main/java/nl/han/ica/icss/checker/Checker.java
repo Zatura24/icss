@@ -21,6 +21,7 @@ public class Checker {
 
     public void check(AST ast) {
         variableTypes = new LinkedList<>();
+        variableTypes.add(new HashMap<>());
 
         traverse(ast.root);
     }
@@ -44,8 +45,6 @@ public class Checker {
      */
     private void findVariableAssignment(ASTNode node) {
         if (node instanceof VariableAssignment) {
-            if (variableTypes.isEmpty()) variableTypes.add(new HashMap<>());
-
             variableTypes.getFirst().put(((VariableAssignment) node).name.name, ExpressionResolver.getExpressionType(((VariableAssignment) node).expression));
         }
     }

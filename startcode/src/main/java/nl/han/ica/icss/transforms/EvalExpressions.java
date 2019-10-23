@@ -70,6 +70,11 @@ public class EvalExpressions implements Transform {
             ((Declaration) node).expression = calculateExpression((Operation) ((Declaration) node).expression);
     }
 
+    /**
+     * Calculate operation
+     * @param operation
+     * @return Literal with calculated value
+     */
     private Literal calculateExpression(Operation operation) {
         Literal lhs = operation.lhs instanceof Operation ? calculateExpression((Operation) operation.lhs) : (Literal) operation.lhs,
                 rhs = operation.rhs instanceof Operation ? calculateExpression((Operation) operation.rhs) : (Literal) operation.rhs;

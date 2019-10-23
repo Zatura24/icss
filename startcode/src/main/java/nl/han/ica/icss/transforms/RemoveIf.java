@@ -25,7 +25,6 @@ public class RemoveIf implements Transform {
     private void replaceIfClause(ASTNode root) {
         ArrayList<ASTNode> body = new ArrayList<>();
         ArrayList<ASTNode> newBody = new ArrayList<>();
-
         ASTNode removeNode = null;
 
         if (root instanceof Stylerule) body = ((Stylerule) root).body;

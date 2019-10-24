@@ -9,9 +9,9 @@ Docent: Michel Portier
 
 In onderstaande tabel wordt aangegeven aan welke eisen zijn voldaan. 
 
-&#9989; : Geïmplementeeerd  
+&#9989; : Geïmplementeerd  
 &#11093; : Geïmplementeerd, maar met bekende bugs  
-&#10060; : Niet geïmplementeerds
+&#10060; : Niet geïmplementeerd
 
 | ID   | Prio   | Voldaan  | Opmerking                                                    |
 | ---- | ------ | -------- | ------------------------------------------------------------ |
@@ -22,12 +22,12 @@ In onderstaande tabel wordt aangegeven aan welke eisen zijn voldaan.
 | CH01 | Should | &#11093; | De variabelen worden top to bottom gechecked. Dit betekend dat een variabele declaratie onderaan de pagina niet wordt herkend bovenin het document. |
 | CH02 | Should | &#9989;  | -                                                            |
 | CH03 | Should | &#9989;  | -                                                            |
-| CH04 | Should | &#11093; | Wanneer een variabele declaratie een berekening of een variabele referentie is, komt er een error. |
+| CH04 | Should | &#9989;  | -                                                            |
 | CH05 | Should | &#9989;  | -                                                            |
-| TR01 | Should | &#11093; | Een berekening van een variabele assignment gaat verkeerd.   |
+| TR01 | Should | &#11093; | Tijdens het opnieuw definiëren van variabelen kan het fout gaan in een berekening |
 | TR02 | Should | &#9989;  | -                                                            |
-| GE01 | Must   | &#9989;  |                                                              |
-| GE02 | Must   | &#9989;  |                                                              |
+| GE01 | Must   | &#9989;  | -                                                            |
+| GE02 | Must   | &#9989;  | -                                                            |
 
 ## Eigen uitbreiding
 

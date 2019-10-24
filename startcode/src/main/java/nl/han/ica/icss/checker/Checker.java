@@ -27,12 +27,18 @@ public class Checker {
     }
 
     private void traverse(ASTNode root) {
-        findVariableAssignment(root);
-        checkVariableReference(root);
-        checkOperationOperands(root);
-        colorNotAllowedInOperation(root);
-        checkStyleDeclaration(root);
-        checkIfCondition(root);
+        if (root instanceof VariableAssignment)
+            findVariableAssignment((VariableAssignment) root);
+        else if (root instanceof VariableReference)
+            checkVariableReference((VariableReference) root);
+        else if (root instanceof Operation) {
+            checkOperationOperands((Operation) root);
+            colorNotAllowedInOperation((Operation) root);
+        }
+        else if (root instanceof Declaration)
+            checkStyleDeclaration((Declaration) root);
+        else if (root instanceof IfClause)
+            checkIfCondition((IfClause) root);
 
         root.getChildren().forEach(this::traverse);
     }
@@ -41,31 +47,30 @@ public class Checker {
      * Stores found variable declaration in hash map
      * @param node to check
      */
-    private void findVariableAssignment(ASTNode node) {
-        if (node instanceof VariableAssignment) {
-            if (((VariableAssignment) node).expression instanceof Literal)
-                variableTypes.getFirst().put(((VariableAssignment) node).name.name, ExpressionResolver.getExpressionType(((VariableAssignment) node).expression));
-
-            if (((VariableAssignment) node).expression instanceof VariableReference) {
-                ExpressionType variableReferenceExpressionType = variableTypes.getFirst().get(((VariableReference) ((VariableAssignment) node).expression).name);
-                variableTypes.getFirst().put(((VariableAssignment) node).name.name, variableReferenceExpressionType);
-            }
-
-            if (((VariableAssignment) node).expression instanceof Operation)
-                variableTypes.getFirst().put(((VariableAssignment) node).name.name, checkOperationOperands(((VariableAssignment) node).expression));
-        }
+    private void findVariableAssignment(VariableAssignment node) {
+        if (node != null)
+            variableTypes.getFirst().put(node.name.name, getExpressionTypeFromExpression(node.expression));
     }
 
     /**
      * Checks found variable reference against hash map
      * @param node to check
      */
-    private void checkVariableReference(ASTNode node) {
-        if (node instanceof VariableReference) {
-            if (!variableTypes.getFirst().containsKey(((VariableReference) node).name)) {
-                node.setError(String.format("Variable \'%s\' is not yet defined.", ((VariableReference) node).name));
-            }
-        }
+    private void checkVariableReference(VariableReference node) {
+        if (node != null && !variableTypes.getFirst().containsKey(node.name))
+            node.setError(String.format("Variable \'%s\' is not yet defined.", node.name));
+    }
+
+    /**
+     * Returns the type of expression be it a Literal, VariableReference or Operation
+     * @param node to check
+     * @return type of expression
+     */
+    private ExpressionType getExpressionTypeFromExpression(Expression node) {
+        if (node instanceof Literal) return ExpressionResolver.getExpressionType(node);
+        if (node instanceof VariableReference) return variableTypes.getFirst().get(((VariableReference) node).name);
+        if (node instanceof Operation) return checkOperationOperands((Operation) node);
+        else return ExpressionType.UNDEFINED;
     }
 
     /**
@@ -74,26 +79,21 @@ public class Checker {
      * @param node to check
      * @return expression type of the operation
      */
-    private ExpressionType checkOperationOperands(ASTNode node) {
-        if (node instanceof Literal) return ExpressionResolver.getExpressionType((Literal) node);
-        if (node instanceof VariableReference) return variableTypes.getFirst().get(((VariableReference) node).name);
-
-        if (node instanceof Operation) {
-            ExpressionType lhsNode = checkOperationOperands(((Operation) node).lhs),
-                            rhsNode = checkOperationOperands(((Operation) node).rhs);
+    private ExpressionType checkOperationOperands(Operation node) {
+        if (node != null) {
+            ExpressionType lhsNode = getExpressionTypeFromExpression(node.lhs),
+                    rhsNode = getExpressionTypeFromExpression(node.rhs);
 
             if (node instanceof MultiplyOperation) {
                 if (lhsNode != ExpressionType.SCALAR && rhsNode != ExpressionType.SCALAR)
                     node.setError("A multiplication must be made with a scalar value");
-
                 return lhsNode != ExpressionType.SCALAR ? lhsNode : rhsNode;
-            }
-
-            if (node instanceof AddOperation || node instanceof SubtractOperation) {
-                if (lhsNode.equals(rhsNode)) return lhsNode;
-                node.setError("Operands must be of same expression type");
+            } else if (node instanceof AddOperation || node instanceof SubtractOperation) {
+                if (!lhsNode.equals(rhsNode)) node.setError("Operands must be of same expression type");
+                return lhsNode;
             }
         }
+
         return ExpressionType.UNDEFINED;
     }
 
@@ -101,11 +101,9 @@ public class Checker {
      * Prevents expression type color in operations
      * @param node to check
      */
-    private void colorNotAllowedInOperation(ASTNode node) {
-        if (node instanceof Operation) {
-            if (((Operation) node).lhs instanceof ColorLiteral || ((Operation) node).rhs instanceof ColorLiteral) {
-                node.setError(String.format("An operand cannot be of type: %s", ExpressionType.COLOR));
-            }
+    private void colorNotAllowedInOperation(Operation node) {
+        if (node != null && (node.lhs instanceof ColorLiteral || node.rhs instanceof ColorLiteral)) {
+            node.setError(String.format("An operand cannot be of type: %s", ExpressionType.COLOR));
         }
     }
 
@@ -113,24 +111,24 @@ public class Checker {
      * Checks if available properties are of their corresponding expression type
      * @param node to check
      */
-    private void checkStyleDeclaration(ASTNode node) {
-        if (node instanceof Declaration) {
+    private void checkStyleDeclaration(Declaration node) {
+        if (node != null) {
             HashMap<String, List<ExpressionType>> map = StyleAttributeChecker.getMap();
-            ExpressionType expressionType = checkOperationOperands(((Declaration) node).expression);
+            ExpressionType expressionType = getExpressionTypeFromExpression(node.expression);
 
-            if (map.containsKey(((Declaration) node).property.name)) {
+            if (map.containsKey(node.property.name)) {
                 boolean valid = false;
 
                 for (ExpressionType validExpressionType :
-                        map.get(((Declaration) node).property.name)) {
-                    valid = validExpressionType == expressionType;
+                        map.get(node.property.name)) {
+                    valid = validExpressionType.equals(expressionType);
                     if (valid) break;
                 }
 
                 if (!valid)
-                    node.setError(String.format("Style attribute \'%s\' cannot be of expression type \'%s\'", ((Declaration) node).property.name, expressionType));
+                    node.setError(String.format("Style attribute \'%s\' cannot be of expression type \'%s\'", node.property.name, expressionType));
             } else {
-                node.setError(String.format("Property \'%s\' does not exist", ((Declaration) node).property.name));
+                node.setError(String.format("Property \'%s\' does not exist", node.property.name));
             }
         }
     }
@@ -139,12 +137,12 @@ public class Checker {
      * Checks if if-condition is of expression type boolean
      * @param node to check
      */
-    private void checkIfCondition(ASTNode node) {
-        if (node instanceof IfClause) {
-            if (((IfClause) node).conditionalExpression instanceof VariableReference) {
-                if (variableTypes.get(0).get(((VariableReference) ((IfClause) node).conditionalExpression).name) != ExpressionType.BOOL)
+    private void checkIfCondition(IfClause node) {
+        if (node != null) {
+            if (node.conditionalExpression instanceof VariableReference) {
+                if (variableTypes.get(0).get(((VariableReference) node.conditionalExpression).name) != ExpressionType.BOOL)
                     node.setError("If condition must be of type boolean");
-            } else if (getExpressionType(((IfClause) node).conditionalExpression) != ExpressionType.BOOL)
+            } else if (getExpressionType(node.conditionalExpression) != ExpressionType.BOOL)
                 node.setError("If condition must be of type boolean");
         }
     }

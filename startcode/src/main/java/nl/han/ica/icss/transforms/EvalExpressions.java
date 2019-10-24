@@ -23,6 +23,7 @@ public class EvalExpressions implements Transform {
     @Override
     public void apply(AST ast) {
         variableValues = new LinkedList<>();
+        variableValues.add(new HashMap<>());
 
         variableTraverse(ast.root);
         expressionTraverse(ast.root);
@@ -43,9 +44,17 @@ public class EvalExpressions implements Transform {
 
     private void findVariableAssignment(ASTNode node) {
         if (node instanceof VariableAssignment) {
-            if (variableValues.isEmpty()) variableValues.add(new HashMap<>());
+            if (((VariableAssignment) node).expression instanceof Literal)
+                variableValues.getFirst().put(((VariableAssignment) node).name.name, ((Literal) ((VariableAssignment) node).expression));
 
-            variableValues.getFirst().put(((VariableAssignment) node).name.name, ((Literal) ((VariableAssignment) node).expression));
+            if (((VariableAssignment) node).expression instanceof VariableReference) {
+                Literal variableReferenceLiteral = variableValues.getFirst().get(((VariableReference) ((VariableAssignment) node).expression).name);
+                variableValues.getFirst().put(((VariableAssignment) node).name.name, variableReferenceLiteral);
+            }
+
+            if (((VariableAssignment) node).expression instanceof Operation) {
+                variableValues.getFirst().put(((VariableAssignment) node).name.name, calculateExpression((Operation) ((VariableAssignment) node).expression));
+            }
         }
     }
 
@@ -76,8 +85,21 @@ public class EvalExpressions implements Transform {
      * @return Literal with calculated value
      */
     private Literal calculateExpression(Operation operation) {
-        Literal lhs = operation.lhs instanceof Operation ? calculateExpression((Operation) operation.lhs) : (Literal) operation.lhs,
-                rhs = operation.rhs instanceof Operation ? calculateExpression((Operation) operation.rhs) : (Literal) operation.rhs;
+        Literal lhs, rhs;
+
+        if (operation.rhs instanceof Operation)
+            rhs = calculateExpression((Operation) operation.rhs);
+        else if (operation.rhs instanceof VariableReference)
+            rhs = variableValues.getFirst().get(((VariableReference) operation.rhs).name);
+        else
+            rhs = (Literal) operation.rhs;
+
+        if (operation.lhs instanceof Operation)
+            lhs = calculateExpression((Operation) operation.lhs);
+        else if (operation.lhs instanceof VariableReference)
+            lhs = variableValues.getFirst().get(((VariableReference) operation.lhs).name);
+        else
+            lhs = (Literal) operation.lhs;
 
         int value = 0;
 

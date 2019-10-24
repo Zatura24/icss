@@ -22,6 +22,10 @@ public class RemoveIf implements Transform {
         root.getChildren().forEach(this::ifClauseTraverse);
     }
 
+    /**
+     * Changes the body of a stylerule or if-clause appropriately
+     * @param root to check
+     */
     private void replaceIfClause(ASTNode root) {
         ArrayList<ASTNode> currentBody = new ArrayList<>();
         ArrayList<ASTNode> newBody = new ArrayList<>();
@@ -48,6 +52,12 @@ public class RemoveIf implements Transform {
         if (!newBody.isEmpty()) replaceIfClause(root);
     }
 
+    /**
+     * Adds a body to an existing body
+     * @param newBody to add
+     * @param nodeToRemove node to replace body with
+     * @param body current body
+     */
     private void replaceBody(ArrayList<ASTNode> newBody, ASTNode nodeToRemove, ArrayList<ASTNode> body) {
         int indexOfRemoveNode = body.indexOf(nodeToRemove);
         if (indexOfRemoveNode != -1) {
@@ -56,6 +66,11 @@ public class RemoveIf implements Transform {
         }
     }
 
+    /**
+     * Checks if boolean expression is true
+     * @param node to check
+     * @return true or false
+     */
     private boolean isIfTrue(IfClause node) {
         return node.conditionalExpression.equals(new BoolLiteral(true));
     }

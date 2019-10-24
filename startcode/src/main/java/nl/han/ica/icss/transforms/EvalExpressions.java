@@ -30,34 +30,35 @@ public class EvalExpressions implements Transform {
     }
 
     private void variableTraverse(ASTNode root) {
-        findVariableAssignment(root);
+        if (root instanceof VariableAssignment)
+            findVariableAssignment((VariableAssignment) root);
+
         removeVariableReference(root);
 
         root.getChildren().forEach(this::variableTraverse);
     }
 
     private void expressionTraverse(ASTNode root) {
-        removeExpression(root);
+        if (root instanceof Declaration)
+            removeOperation((Declaration) root);
 
         root.getChildren().forEach(this::expressionTraverse);
     }
 
-    private void findVariableAssignment(ASTNode node) {
-        if (node instanceof VariableAssignment) {
-            if (((VariableAssignment) node).expression instanceof Literal)
-                variableValues.getFirst().put(((VariableAssignment) node).name.name, ((Literal) ((VariableAssignment) node).expression));
-
-            if (((VariableAssignment) node).expression instanceof VariableReference) {
-                Literal variableReferenceLiteral = variableValues.getFirst().get(((VariableReference) ((VariableAssignment) node).expression).name);
-                variableValues.getFirst().put(((VariableAssignment) node).name.name, variableReferenceLiteral);
-            }
-
-            if (((VariableAssignment) node).expression instanceof Operation) {
-                variableValues.getFirst().put(((VariableAssignment) node).name.name, calculateExpression((Operation) ((VariableAssignment) node).expression));
-            }
+    /**
+     * Stores found variable declaration in hash map
+     * @param node to check
+     */
+    private void findVariableAssignment(VariableAssignment node) {
+        if (node != null && node.expression != null) {
+            variableValues.getFirst().put(node.name.name, getLiteral(node.expression));
         }
     }
 
+    /**
+     * Replaces variable references with hash map's literal
+     * @param node to check
+     */
     private void removeVariableReference(ASTNode node) {
         if (node instanceof Declaration && ((Declaration) node).expression instanceof VariableReference)
             ((Declaration) node).expression = variableValues.getFirst().get(((VariableReference) ((Declaration) node).expression).name);
@@ -74,18 +75,23 @@ public class EvalExpressions implements Transform {
             ((IfClause) node).conditionalExpression = variableValues.getFirst().get(((VariableReference) ((IfClause) node).conditionalExpression).name);
     }
 
-    private void removeExpression(ASTNode node) {
-        if (node instanceof Declaration && ((Declaration) node).expression instanceof Operation)
-            ((Declaration) node).expression = calculateExpression((Operation) ((Declaration) node).expression);
+    /**
+     * Removes found operation with calculated literal
+     * @param node to check
+     */
+    private void removeOperation(Declaration node) {
+        if (node != null && node.expression instanceof Operation)
+            node.expression = calculateOperation((Operation) node.expression);
     }
 
     /**
-     * Calculate operation
-     * @param operation
+     * Calculates operation
+     * @param operation to check
      * @return Literal with calculated value
      */
-    private Literal calculateExpression(Operation operation) {
-        Literal lhs = getLiteral(operation.rhs), rhs = getLiteral(operation.lhs);
+    private Literal calculateOperation(Operation operation) {
+        Literal lhs = getLiteral(operation.lhs),
+                rhs = getLiteral(operation.rhs);
 
         int value = 0;
 
@@ -100,17 +106,28 @@ public class EvalExpressions implements Transform {
         return createNewLiteral(!(lhs instanceof ScalarLiteral) ? lhs : rhs, value);
     }
 
+    /**
+     * Get literal value of given expression
+     * @param node to check
+     * @return Literal with value
+     */
     private Literal getLiteral(Expression node) {
-        Literal hs;
+        Literal literal;
         if (node instanceof Operation)
-            hs = calculateExpression((Operation) node);
+            literal = calculateOperation((Operation) node);
         else if (node instanceof VariableReference)
-            hs = variableValues.getFirst().get(((VariableReference) node).name);
+            literal = variableValues.getFirst().get(((VariableReference) node).name);
         else
-            hs = (Literal) node;
-        return hs;
+            literal = (Literal) node;
+        return literal;
     }
 
+    /**
+     * Creates a new literal with the same value
+     * @param literal to create
+     * @param value of new literal
+     * @return literal with new value
+     */
     private Literal createNewLiteral(Literal literal, int value) {
         if (literal instanceof PercentageLiteral) {
             return new PercentageLiteral(value);

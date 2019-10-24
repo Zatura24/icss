@@ -62,18 +62,6 @@ public class Checker {
     }
 
     /**
-     * Returns the type of expression be it a Literal, VariableReference or Operation
-     * @param node to check
-     * @return type of expression
-     */
-    private ExpressionType getExpressionTypeFromExpression(Expression node) {
-        if (node instanceof Literal) return ExpressionResolver.getExpressionType(node);
-        if (node instanceof VariableReference) return variableTypes.getFirst().get(((VariableReference) node).name);
-        if (node instanceof Operation) return checkOperationOperands((Operation) node);
-        else return ExpressionType.UNDEFINED;
-    }
-
-    /**
      * Checks if left- and right hand side are of equal expression type
      * Multiplication allows one operand to be of expression type scalar
      * @param node to check
@@ -145,5 +133,17 @@ public class Checker {
             } else if (getExpressionType(node.conditionalExpression) != ExpressionType.BOOL)
                 node.setError("If condition must be of type boolean");
         }
+    }
+
+    /**
+     * Returns the type of expression be it a Literal, VariableReference or Operation
+     * @param node to check
+     * @return type of expression
+     */
+    private ExpressionType getExpressionTypeFromExpression(Expression node) {
+        if (node instanceof Literal) return ExpressionResolver.getExpressionType(node);
+        if (node instanceof VariableReference) return variableTypes.getFirst().get(((VariableReference) node).name);
+        if (node instanceof Operation) return checkOperationOperands((Operation) node);
+        else return ExpressionType.UNDEFINED;
     }
 }

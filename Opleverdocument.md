@@ -24,7 +24,7 @@ In onderstaande tabel wordt aangegeven aan welke eisen zijn voldaan.
 | CH03 | Should | &#9989;  | -                                                            |
 | CH04 | Should | &#9989;  | -                                                            |
 | CH05 | Should | &#9989;  | -                                                            |
-| TR01 | Should | &#11093; | Tijdens het opnieuw definiëren van variabelen kan het fout gaan in een berekening |
+| TR01 | Should | &#9989;  | -                                                            |
 | TR02 | Should | &#9989;  | -                                                            |
 | GE01 | Must   | &#9989;  | -                                                            |
 | GE02 | Must   | &#9989;  | -                                                            |

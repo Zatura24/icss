@@ -51,9 +51,8 @@ public class Checker {
                 variableTypes.getFirst().put(((VariableAssignment) node).name.name, variableReferenceExpressionType);
             }
 
-            if (((VariableAssignment) node).expression instanceof Operation) {
+            if (((VariableAssignment) node).expression instanceof Operation)
                 variableTypes.getFirst().put(((VariableAssignment) node).name.name, checkOperationOperands(((VariableAssignment) node).expression));
-            }
         }
     }
 

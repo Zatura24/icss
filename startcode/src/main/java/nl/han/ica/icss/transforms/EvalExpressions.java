@@ -23,6 +23,7 @@ public class EvalExpressions implements Transform {
     @Override
     public void apply(AST ast) {
         variableValues = new LinkedList<>();
+        variableValues.add(new HashMap<>());
 
         variableTraverse(ast.root);
         expressionTraverse(ast.root);
@@ -43,9 +44,17 @@ public class EvalExpressions implements Transform {
 
     private void findVariableAssignment(ASTNode node) {
         if (node instanceof VariableAssignment) {
-            if (variableValues.isEmpty()) variableValues.add(new HashMap<>());
+            if (((VariableAssignment) node).expression instanceof Literal)
+                variableValues.getFirst().put(((VariableAssignment) node).name.name, ((Literal) ((VariableAssignment) node).expression));
 
-            variableValues.getFirst().put(((VariableAssignment) node).name.name, ((Literal) ((VariableAssignment) node).expression));
+            if (((VariableAssignment) node).expression instanceof VariableReference) {
+                Literal variableReferenceLiteral = variableValues.getFirst().get(((VariableReference) ((VariableAssignment) node).expression).name);
+                variableValues.getFirst().put(((VariableAssignment) node).name.name, variableReferenceLiteral);
+            }
+
+            if (((VariableAssignment) node).expression instanceof Operation) {
+                variableValues.getFirst().put(((VariableAssignment) node).name.name, calculateExpression((Operation) ((VariableAssignment) node).expression));
+            }
         }
     }
 
@@ -76,8 +85,7 @@ public class EvalExpressions implements Transform {
      * @return Literal with calculated value
      */
     private Literal calculateExpression(Operation operation) {
-        Literal lhs = operation.lhs instanceof Operation ? calculateExpression((Operation) operation.lhs) : (Literal) operation.lhs,
-                rhs = operation.rhs instanceof Operation ? calculateExpression((Operation) operation.rhs) : (Literal) operation.rhs;
+        Literal lhs = getLiteral(operation.rhs), rhs = getLiteral(operation.lhs);
 
         int value = 0;
 
@@ -90,6 +98,17 @@ public class EvalExpressions implements Transform {
         }
 
         return createNewLiteral(!(lhs instanceof ScalarLiteral) ? lhs : rhs, value);
+    }
+
+    private Literal getLiteral(Expression node) {
+        Literal hs;
+        if (node instanceof Operation)
+            hs = calculateExpression((Operation) node);
+        else if (node instanceof VariableReference)
+            hs = variableValues.getFirst().get(((VariableReference) node).name);
+        else
+            hs = (Literal) node;
+        return hs;
     }
 
     private Literal createNewLiteral(Literal literal, int value) {

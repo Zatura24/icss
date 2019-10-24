@@ -38,11 +38,22 @@ public class RemoveIf implements Transform {
             }
         }
 
-        if (root instanceof Stylerule) ((Stylerule) root).body.remove(nodeToRemove);
-        if (root instanceof IfClause) ((IfClause) root).body.remove(nodeToRemove);
-        newBody.forEach(root::addChild);
+        if (root instanceof Stylerule) {
+            replaceBody(newBody, nodeToRemove, ((Stylerule) root).body);
+        }
+        if (root instanceof IfClause) {
+            replaceBody(newBody, nodeToRemove, ((IfClause) root).body);
+        }
 
         if (!newBody.isEmpty()) replaceIfClause(root);
+    }
+
+    private void replaceBody(ArrayList<ASTNode> newBody, ASTNode nodeToRemove, ArrayList<ASTNode> body) {
+        int indexOfRemoveNode = body.indexOf(nodeToRemove);
+        if (indexOfRemoveNode != -1) {
+            body.addAll(indexOfRemoveNode, newBody);
+            body.remove(nodeToRemove);
+        }
     }
 
     private boolean isIfTrue(IfClause node) {

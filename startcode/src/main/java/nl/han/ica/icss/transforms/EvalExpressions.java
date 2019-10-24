@@ -85,21 +85,7 @@ public class EvalExpressions implements Transform {
      * @return Literal with calculated value
      */
     private Literal calculateExpression(Operation operation) {
-        Literal lhs, rhs;
-
-        if (operation.rhs instanceof Operation)
-            rhs = calculateExpression((Operation) operation.rhs);
-        else if (operation.rhs instanceof VariableReference)
-            rhs = variableValues.getFirst().get(((VariableReference) operation.rhs).name);
-        else
-            rhs = (Literal) operation.rhs;
-
-        if (operation.lhs instanceof Operation)
-            lhs = calculateExpression((Operation) operation.lhs);
-        else if (operation.lhs instanceof VariableReference)
-            lhs = variableValues.getFirst().get(((VariableReference) operation.lhs).name);
-        else
-            lhs = (Literal) operation.lhs;
+        Literal lhs = getLiteral(operation.rhs), rhs = getLiteral(operation.lhs);
 
         int value = 0;
 
@@ -112,6 +98,17 @@ public class EvalExpressions implements Transform {
         }
 
         return createNewLiteral(!(lhs instanceof ScalarLiteral) ? lhs : rhs, value);
+    }
+
+    private Literal getLiteral(Expression node) {
+        Literal hs;
+        if (node instanceof Operation)
+            hs = calculateExpression((Operation) node);
+        else if (node instanceof VariableReference)
+            hs = variableValues.getFirst().get(((VariableReference) node).name);
+        else
+            hs = (Literal) node;
+        return hs;
     }
 
     private Literal createNewLiteral(Literal literal, int value) {

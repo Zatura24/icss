@@ -34,9 +34,7 @@ public class Checker {
         checkStyleDeclaration(root);
         checkIfCondition(root);
 
-        for (ASTNode node : root.getChildren()) {
-            traverse(node);
-        }
+        root.getChildren().forEach(this::traverse);
     }
 
     /**

@@ -23,31 +23,29 @@ public class RemoveIf implements Transform {
     }
 
     private void replaceIfClause(ASTNode root) {
-        ArrayList<ASTNode> body = new ArrayList<>();
+        ArrayList<ASTNode> currentBody = new ArrayList<>();
         ArrayList<ASTNode> newBody = new ArrayList<>();
-        ASTNode removeNode = null;
+        ASTNode nodeToRemove = null;
 
-        if (root instanceof Stylerule) body = ((Stylerule) root).body;
-        if (root instanceof IfClause) body = ((IfClause) root).body;
+        if (root instanceof Stylerule) currentBody = ((Stylerule) root).body;
+        if (root instanceof IfClause) currentBody = ((IfClause) root).body;
 
         for (ASTNode node :
-                body) {
+                currentBody) {
             if (node instanceof IfClause) {
-                if (conditionalExpressionResult((IfClause) node)) {
-                    newBody.addAll(((IfClause) node).body);
-                }
-                removeNode = node;
+                if (isIfTrue((IfClause) node)) newBody.addAll(((IfClause) node).body);
+                nodeToRemove = node;
             }
         }
 
-        if (root instanceof Stylerule) ((Stylerule) root).body.remove(removeNode);
-        if (root instanceof IfClause) ((IfClause) root).body.remove(removeNode);
+        if (root instanceof Stylerule) ((Stylerule) root).body.remove(nodeToRemove);
+        if (root instanceof IfClause) ((IfClause) root).body.remove(nodeToRemove);
         newBody.forEach(root::addChild);
 
         if (!newBody.isEmpty()) replaceIfClause(root);
     }
 
-    private boolean conditionalExpressionResult(IfClause node) {
+    private boolean isIfTrue(IfClause node) {
         return node.conditionalExpression.equals(new BoolLiteral(true));
     }
 }

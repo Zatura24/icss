@@ -43,7 +43,17 @@ public class Checker {
      */
     private void findVariableAssignment(ASTNode node) {
         if (node instanceof VariableAssignment) {
-            variableTypes.getFirst().put(((VariableAssignment) node).name.name, ExpressionResolver.getExpressionType(((VariableAssignment) node).expression));
+            if (((VariableAssignment) node).expression instanceof Literal)
+                variableTypes.getFirst().put(((VariableAssignment) node).name.name, ExpressionResolver.getExpressionType(((VariableAssignment) node).expression));
+
+            if (((VariableAssignment) node).expression instanceof VariableReference) {
+                ExpressionType variableReferenceExpressionType = variableTypes.getFirst().get(((VariableReference) ((VariableAssignment) node).expression).name);
+                variableTypes.getFirst().put(((VariableAssignment) node).name.name, variableReferenceExpressionType);
+            }
+
+            if (((VariableAssignment) node).expression instanceof Operation) {
+                variableTypes.getFirst().put(((VariableAssignment) node).name.name, checkOperationOperands(((VariableAssignment) node).expression));
+            }
         }
     }
 
@@ -85,7 +95,7 @@ public class Checker {
                 node.setError("Operands must be of same expression type");
             }
         }
-        return null;
+        return ExpressionType.UNDEFINED;
     }
 
     /**
